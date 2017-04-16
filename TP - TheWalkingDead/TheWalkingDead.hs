@@ -1,12 +1,16 @@
 import Text.Show.Functions
-data Protagonista = Protagonista Nombre PuntosVida deriving (Show)
+import Data.List
+data Protagonista = Protagonista {
+   nombre :: Nombre,
+   vida :: PuntosVida
+  } deriving (Show)
 
 type Nombre = String
 type PuntosVida = Int
 
-daryl = Protagonista "daryl" 55
-maggie = Protagonista "maggie" 100
-carol = Protagonista "carol" 200
+daryl = Protagonista {nombre="daryl", vida = 55}
+maggie = Protagonista {nombre="maggie", vida = 100}
+carol = Protagonista {nombre="carol", vida = 200}
 
 zombieTranqui protagonista = dañoZombieTranqui protagonista
 zombieConCasco protagonista = dañoZombieConCasco protagonista
@@ -16,9 +20,9 @@ matar _ = id
 caer unZombie = (unZombie . unZombie)
 sacrificarse _ = matarProtagonista
 
-dañoZombieTranqui (Protagonista unNombre unosPuntosVida) = Protagonista unNombre (unosPuntosVida - 10)
-dañoZombieConCasco (Protagonista unNombre unosPuntosVida) = Protagonista unNombre (div unosPuntosVida 2)
-matarProtagonista (Protagonista unNombre unosPuntosVida) =  Protagonista unNombre 0
+dañoZombieTranqui protagonista = vida protagonista - 10
+dañoZombieConCasco protagonista = div (vida protagonista) 2
+matarProtagonista protagonista =  vida protagonista * 0
 -- Mostrar en consola --
 
 -- 3) (zombieTranqui . zombieConCasco) carol
