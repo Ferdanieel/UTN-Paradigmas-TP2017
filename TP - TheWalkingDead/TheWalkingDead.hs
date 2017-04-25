@@ -86,4 +86,6 @@ Protagonista {nombre = "maggie", vida = 80, reaccion = <function>, amigos = [Pro
 Protagonista {nombre = "maggie", vida = -40, reaccion = <function>, amigos = [Protagonista {nombre = "carol", vida = 200, reaccion = <function>, amigos = [Protagonista {nombre = "victorSueiro", vida = 1, reaccion = <function>, amigos = []}]},Protagonista {nombre = "daryl", vida = 0, reaccion = <function>, amigos = [Protagonista {nombre = "carol", vida = 200, reaccion = <function>, amigos = [Protagonista {nombre = "victorSueiro", vida = 1, reaccion = <function>, amigos = []}]}]},Protagonista {nombre = "krilin", vida = 0, reaccion = <function>, amigos = []}]}
 
 5) filter (\x -> vida x == 0) (amigos (horda maggie [zombieTranqui,zombieBuenazoAstuto 20,zombieReSacado,zombieBuenazoAstuto 1, zombieTranqui]))
+[Protagonista {nombre = "daryl", vida = 0, reaccion = <function>, amigos = [Protagonista {nombre = "carol", vida = 200, reaccion = <function>, amigos = [Protagonista {nombre = "victorSueiro", vida = 1, reaccion = <function>, amigos = []}]}]},Protagonista {nombre = "krilin", vida = 0, reaccion = <function>, amigos = []}]
+
 -}
