@@ -1,68 +1,133 @@
+{-# LANGUAGE NoMonomorphismRestriction #-}
 import Text.Show.Functions
 import Data.List
 
 type Nombre = String
-type PuntosVida = Int
-type ReaccionAnteZombie = Zombie -> Protagonista -> Protagonista -- Este es el TIPO de las acciones (definidas abajo) --
-type SeresQueridos = [Nombre]
+type Vida = Int
+type Amigos = [Protagonista]
+type Tipo = String
+type Zombie = Protagonista -> Protagonista
+type Reaccion =  Zombie -> Protagonista -> Protagonista
+type Hambre = Int
 
 data Protagonista = Protagonista {
    nombre :: Nombre,
-   vida :: PuntosVida
-   reaccion :: ReaccionAnteZombie
-   seresQueridos :: SeresQueridos
-  } deriving (Show)
+   vida :: Vida,
+   reaccion :: Reaccion,
+   amigos :: Amigos
+ } deriving Show
 
+nuevoNombre unNOmbre unProtagonista = unProtagonista {nombre = unNOmbre}
+nuevaVida unaVida unProtagonista = unProtagonista {vida = unaVida}
+nuevaReaccion unaReaccion unProtagonista = unProtagonista {reaccion = unaReaccion}
+nuevosAmigos unosAmigos unProtagonista = unProtagonista {amigos = unosAmigos}
 
+instance Eq Protagonista where
+  protagonista1 == protagonista2 =
+    nombre protagonista1 == nombre protagonista2 &&
+    vida protagonista1 == vida protagonista2
 
-daryl = Protagonista {nombre = "daryl", vida = 55, comerSemillasDeHermitaño 30 , ["carol"] }
-maggie = Protagonista {nombre = "maggie", vida = 100, caer, ["carol", "daryl", "krilin"]}
-carol = Protagonista {nombre = "carol", vida = 200, matar, ["victor"], }
-krilin = Protagonista {nombre = "krilin", vida = 1, sacrificarse, []}
-victor sueiro = Protagonista {nombre = "victor sueiro", vida = 1, sacrificarse, []}
+daryl = Protagonista {nombre = "daryl", vida = 55, reaccion = comerSemillasDeHermitanio 11, amigos = [carol] }
+maggie = Protagonista {nombre = "maggie", vida = 100, reaccion = caer, amigos = [carol,daryl,krilin]}
+carol = Protagonista {nombre = "carol", vida = 200, reaccion = matar , amigos = [victorSueiro]}
+krilin = Protagonista {nombre = "krilin", vida = 1, reaccion = sacrificarse, amigos = []}
+victorSueiro = Protagonista {nombre = "victorSueiro", vida = 1, reaccion = sacrificarse, amigos = []}
 
+zombieTranqui :: Zombie
+zombieTranqui unProtagonista | unProtagonista == carol = (reaccion unProtagonista) zombieTranqui (danioZombieTranqui unProtagonista)
+                             | unProtagonista == daryl = (reaccion unProtagonista) zombieTranqui (danioZombieTranqui unProtagonista)
+                             | unProtagonista == krilin = (reaccion unProtagonista) zombieTranqui (danioZombieTranqui unProtagonista)
+                             | unProtagonista == maggie = (reaccion unProtagonista) zombieTranqui (danioZombieTranqui unProtagonista)
+                             | unProtagonista == victorSueiro = (reaccion unProtagonista) zombieTranqui (danioZombieTranqui unProtagonista)
+                             | otherwise = danioZombieTranqui unProtagonista
 
+danioZombieTranqui :: Protagonista -> Protagonista
+danioZombieTranqui unProtagonista = nuevaVida (vida unProtagonista - 10) unProtagonista
 
-zombieTranqui protagonista = dañoZombieTranqui protagonista
-zombieConCasco protagonista = dañoZombieConCasco protagonista
+zombieConCasco :: Zombie
+zombieConCasco unProtagonista | unProtagonista == carol = (reaccion unProtagonista) zombieConCasco (danioZombieConCasco unProtagonista)
+                              | unProtagonista == daryl = (reaccion unProtagonista) zombieConCasco (danioZombieConCasco unProtagonista)
+                              | unProtagonista == maggie = (reaccion unProtagonista) zombieConCasco (danioZombieConCasco unProtagonista)
+                              | unProtagonista == krilin = (reaccion unProtagonista) zombieConCasco (danioZombieConCasco unProtagonista)
+                              | unProtagonista == victorSueiro = (reaccion unProtagonista) zombieConCasco (danioZombieConCasco unProtagonista)
+                              | otherwise = danioZombieConCasco unProtagonista
+
+danioZombieConCasco :: Protagonista -> Protagonista
+danioZombieConCasco unProtagonista = (nuevaVida (div (vida unProtagonista) 2) unProtagonista)
+
+zombieSinDientes :: Zombie
 zombieSinDientes = id
-zombieBuenazoAstuto hambre | hambre < seresQueridos = zombieSinDientes
-                           | otherwise = zombieConCasco
-zombieReSacado = zombieTranqui && map zombieTranqui (map . zombieConCasco) seresQueridos --Fijate esto --
+
+zombieBuenazoAstuto :: Hambre -> Protagonista -> Protagonista
+zombieBuenazoAstuto unHambre unProtagonista | unHambre < length (amigos unProtagonista) = zombieTranqui unProtagonista
+                                            | unHambre >= length (amigos unProtagonista) = zombieConCasco unProtagonista
+zombieReSacado :: Zombie
+zombieReSacado unProtagonista  = nuevosAmigos (map (zombieTranqui . zombieConCasco) (amigos unProtagonista)) (zombieTranqui unProtagonista)
+
+pelearAmigos :: Protagonista -> [Protagonista] -> Protagonista
+pelearAmigos unProtagonista unosProtagonistas = nuevosAmigos (diferenciaDeConjuntos (amigos unProtagonista) unosProtagonistas) unProtagonista
+
+diferenciaDeConjuntos :: [Protagonista] -> [Protagonista] -> [Protagonista]
+diferenciaDeConjuntos xs ys = filter (\x -> not (x `elem` ys)) (xs)
+
+comerSemillasDeHermitanio :: Int -> Zombie -> Protagonista -> Protagonista
+comerSemillasDeHermitanio semillas unZombie unProtagonista | vida unProtagonista <= 0 = unProtagonista
+                                                           | vida unProtagonista > 0 && semillas <= 10 = alterarVidadebidoEfectoSemilla unProtagonista
+                                                           | vida unProtagonista > 0 && semillas > 10 = muerte unProtagonista
+
+alterarVidadebidoEfectoSemilla :: Protagonista -> Protagonista
+alterarVidadebidoEfectoSemilla unProtagonista = nuevaVida (vida unProtagonista * 0 + 100) unProtagonista
+
+horda :: Protagonista -> [Zombie] -> Protagonista
+horda unProtagonista unosZombies = foldl (flip ($)) unProtagonista unosZombies
 
 
 
+matar :: Reaccion
 matar _ = id
-caer unZombie = (unZombie . unZombie)
-sacrificarse _ = protagonistaMuerto
+caer :: Reaccion
+caer unZombie = (.) unZombie unZombie
+sacrificarse :: Reaccion
+sacrificarse _ = muerte
+muerte :: Protagonista -> Protagonista
+muerte unProtagonista = nuevaVida (vida unProtagonista * 0) (nuevosAmigos (diferenciaDeConjuntos (amigos unProtagonista) [krilin,victorSueiro]) unProtagonista)
 
+{- Consultas:
+1) pelearAmigos maggie [daryl,carol,victorSueiro]
+Protagonista {nombre = "maggie", vida = 100, reaccion = <function>, amigos =
+[Protagonista {nombre = "krilin", vida = 1, reaccion = <function>, amigos = []}]}
 
+2) zombieBuenazoAstuto maggie 5
+Protagonista {nombre = "maggie", vida = 25, reaccion = <function>,
+amigos = [Protagonista {nombre = "carol", vida = 200, reaccion = <function>,
+amigos = [Protagonista {nombre = "victorSueiro", vida = 1, reaccion = <function>,
+amigos = []}]},Protagonista {nombre = "daryl", vida = 55, reaccion = <function>,
+amigos = [Protagonista {nombre = "carol", vida = 200, reaccion = <function>,
+amigos = [Protagonista {nombre = "victorSueiro", vida = 1, reaccion = <function>,
+amigos = []}]}]},Protagonista {nombre = "krilin", vida = 1, reaccion = <function>, amigos = []}]}
 
-dañoZombieTranqui protagonista = vida protagonista - 10 -- Podriamos reemplazarlo a "dañoZombieTranqui" y "dañoZombieConCasco directamente en zombieTranqui y zombieConCasco, respectivamente--
-dañoZombieConCasco protagonista = div (vida protagonista) 2
-protagonistaMuerto protagonista =  vida protagonista * 0
-comerSemillasDeHermitaño cantidadDeSemillas | vida <= 0 = id
-                                            | cantidadDeSemillas <= 10 = vida * 0 + 100 --Funciona si le paso a protagonista por Patter Matcihng????
-                                            | cantidadDeSemillas > 10 = protagonistaMuerto
+3) zombieBuenazoAstuto maggie 2
+Protagonista {nombre = "maggie", vida = 80, reaccion = <function>,
+amigos = [Protagonista {nombre = "carol", vida = 200, reaccion = <function>,
+amigos = [Protagonista {nombre = "victorSueiro", vida = 1, reaccion = <function>,
+amigos = []}]},Protagonista {nombre = "daryl", vida = 55, reaccion = <function>,
+amigos = [Protagonista {nombre = "carol", vida = 200, reaccion = <function>,
+amigos = [Protagonista {nombre = "victorSueiro", vida = 1, reaccion = <function>,
+amigos = []}]}]},Protagonista {nombre = "krilin", vida = 1, reaccion = <function>, amigos = []}]}
 
+4) horda maggie [zombieTranqui,zombieBuenazoAstuto 20,zombieReSacado,zombieBuenazoAstuto 1, zombieTranqui]
+Protagonista {nombre = "maggie", vida = -40, reaccion = <function>,
+amigos = [Protagonista {nombre = "carol", vida = 200, reaccion = <function>,
+amigos = [Protagonista {nombre = "victorSueiro", vida = 1, reaccion = <function>,
+amigos = []}]},Protagonista {nombre = "daryl", vida = 0, reaccion = <function>,
+amigos = [Protagonista {nombre = "carol", vida = 200, reaccion = <function>,
+amigos = [Protagonista {nombre = "victorSueiro", vida = 1, reaccion = <function>,
+amigos = []}]}]},Protagonista {nombre = "krilin", vida = 0, reaccion = <function>, amigos = []}]}
 
--- Mostrar en consola --
+5) filter (\x -> vida x == 0) (amigos (horda maggie [zombieTranqui,zombieBuenazoAstuto 20,zombieReSacado,zombieBuenazoAstuto 1, zombieTranqui]))
+[Protagonista {nombre = "daryl", vida = 0, reaccion = <function>,
+amigos = [Protagonista {nombre = "carol", vida = 200, reaccion = <function>,
+amigos = [Protagonista {nombre = "victorSueiro", vida = 1, reaccion = <function>,
+amigos = []}]}]},Protagonista {nombre = "krilin", vida = 0, reaccion = <function>, amigos = []}]
 
--- 3) (zombieTranqui . zombieConCasco) carol
--- 5) sacrificarse zombieTranqui carol
--- 6) caer zombieConCasco (matar zombieSinDientes maggie)
-
-----------------------------------------------------------------------
-
---2.1) TIPOS
-zombieTranqui :: Protagonista -> Protagonista
-zombieConCasco :: Protagonista -> Protagonista
-zombieSinDientes :: Protagonista -> Protagonista
-matar :: Zombie -> Protagonista -> Protagonista
-caer :: Zombie -> Protagonista -> Protagonista
-sacrificarse :: Zombie -> Protagonista -> Protagonista
-
---6) HORDAS 
-
-ataqueDeHordas :: -> -> -> -> Protagonista -- Fijate como pensarlo aca
-
+-}
