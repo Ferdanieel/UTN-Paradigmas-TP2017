@@ -34,14 +34,21 @@ krilin = Protagonista {nombre = "krilin", vida = 1, reaccion = sacrificarse, ami
 victorSueiro = Protagonista {nombre = "victorSueiro", vida = 1, reaccion = sacrificarse, amigos = []}
 
 zombieTranqui :: Zombie
-zombieTranqui unProtagonista = (reaccion unProtagonista) danioZombieTranqui unProtagonista
-danioZombieTranqui :: Protagonista -> Protagonista
-danioZombieTranqui unProtagonista = nuevaVida (vida unProtagonista - 10) unProtagonista
+zombieTranqui unProtagonista | unProtagonista == carol = (reaccion unProtagonista) zombieTranqui (nuevaVida (vida unProtagonista - 10) unProtagonista)
+                             | unProtagonista == daryl = (reaccion unProtagonista) zombieTranqui (nuevaVida (vida unProtagonista - 10) unProtagonista)
+                             | unProtagonista == krilin = (reaccion unProtagonista) zombieTranqui (nuevaVida (vida unProtagonista - 10) unProtagonista)
+                             | unProtagonista == maggie = (reaccion unProtagonista) zombieTranqui (nuevaVida (vida unProtagonista - 10) unProtagonista)
+                             | unProtagonista == victorSueiro = (reaccion unProtagonista) zombieTranqui (nuevaVida (vida unProtagonista - 10) unProtagonista)
+                             | otherwise = nuevaVida (vida unProtagonista - 10) unProtagonista
 
 zombieConCasco :: Zombie
-zombieConCasco unProtagonista = (reaccion unProtagonista) danioZombieConCasco unProtagonista
-danioZombieConCasco :: Protagonista -> Protagonista
-danioZombieConCasco unProtagonista = nuevaVida (div (vida unProtagonista) 2) unProtagonista
+zombieConCasco unProtagonista | unProtagonista == carol = (reaccion unProtagonista) zombieConCasco (nuevaVida (div (vida unProtagonista) 2) unProtagonista)
+                              | unProtagonista == daryl = (reaccion unProtagonista) zombieConCasco (nuevaVida (div (vida unProtagonista) 2) unProtagonista)
+                              | unProtagonista == maggie = (reaccion unProtagonista) zombieConCasco (nuevaVida (div (vida unProtagonista) 2) unProtagonista)
+                              | unProtagonista == krilin = (reaccion unProtagonista) zombieConCasco (nuevaVida (div (vida unProtagonista) 2) unProtagonista)
+                              | unProtagonista == victorSueiro = (reaccion unProtagonista) zombieConCasco (nuevaVida (div (vida unProtagonista) 2) unProtagonista)
+                              |  otherwise = (nuevaVida (div (vida unProtagonista) 2) unProtagonista)
+
 
 zombieSinDientes :: Zombie
 zombieSinDientes = id
